@@ -15,9 +15,11 @@ final-answer validation, explicit constraint checks, and safety limits. Model
 decisions will be reserved for semantic interpretation and adaptive action
 selection.
 
-This task creates the project structure only. The agent loop, tools, model
-integration, evidence dataset, and evaluation logic are intentionally not
-implemented yet.
+The repository currently includes a six-note synthetic evidence corpus and four
+deterministic tools for lexical note search, note retrieval, safe arithmetic,
+and source-backed constraint checking. The agent loop, model integration,
+final-answer validation, CLI workflow, and evaluation logic are intentionally
+not implemented yet.
 
 ## Requirements
 
