@@ -25,6 +25,14 @@ from research_agent.transformers_model import (
             FinalAction("F1 was 0.74.", ["lora-small"]),
         ),
         (
+            '{"action":"search_notes","arguments":{"query":"LoRA"}}',
+            ToolAction("search_notes", {"query": "LoRA"}),
+        ),
+        (
+            '{"action":"final","answer":"F1 was 0.74.","evidence_ids":["lora-small"]}',
+            FinalAction("F1 was 0.74.", ["lora-small"]),
+        ),
+        (
             '  {"type":"tool","tool":"calculate","arguments":{"expression":"2+2"}} \n',
             ToolAction("calculate", {"expression": "2+2"}),
         ),
@@ -47,6 +55,8 @@ def test_parse_model_action_accepts_supported_json(text: str, expected: object) 
         ('{"type":"tool","tool":"read_note","arguments":[]}', "must be an object"),
         ('{"type":"final","evidence_ids":[]}', "exactly"),
         ('{"type":"final","answer":"No","evidence_ids":"note"}', "array of strings"),
+        ('{"action":"search_notes","arguments":[]}', "must be an object"),
+        ('{"action":"final","answer":"No","evidence_ids":"note"}', "array of strings"),
     ],
 )
 def test_parse_model_action_rejects_invalid_responses(text: str, message: str) -> None:
@@ -81,6 +91,8 @@ def test_system_instruction_directs_search_progress_and_avoids_repeats() -> None
     instruction = SYSTEM_INSTRUCTION.lower()
     assert "after finding a relevant result, normally call read_note" in instruction
     assert "do not repeat an identical successful tool call" in instruction
+    assert 'tool action: {"action":"<tool name>"' in instruction
+    assert 'final action: {"action":"final"' in instruction
 
 
 def test_default_model_is_qwen_3_5(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -160,7 +172,7 @@ def test_decide_supports_batch_encoding_outputs() -> None:
 
         def decode(self, tokens: object, *, skip_special_tokens: bool) -> str:
             assert skip_special_tokens is True
-            return '{"type":"tool","tool":"search_notes","arguments":{"query":"LoRA"}}'
+            return '{"action":"search_notes","arguments":{"query":"LoRA"}}'
 
     class FakeModel:
         def generate(self, **kwargs: object) -> FakeGeneratedIds:
