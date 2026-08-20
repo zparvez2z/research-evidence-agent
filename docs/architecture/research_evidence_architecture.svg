@@ -28,21 +28,17 @@
     <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d97706"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
     <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6746e8"/><stop offset="1" stop-color="#8b6cff"/></linearGradient>
   </defs>
-
   <rect width="1600" height="900" fill="url(#bg)"/>
   <circle cx="1480" cy="65" r="180" fill="#e8eeff" opacity=".55"/>
   <circle cx="80" cy="830" r="210" fill="#efebff" opacity=".5"/>
-
   <text x="48" y="57" font-size="34" font-weight="780" class="t">Research Evidence Agent — System Architecture</text>
   <text x="48" y="86" font-size="15" class="muted">Agentic decision-making with deterministic execution, explicit evidence, and a bounded safety layer.</text>
-
   <g transform="translate(1170,33)">
     <rect x="0" y="0" width="150" height="28" rx="14" fill="#fff" stroke="#d4ddea"/><circle cx="15" cy="14" r="5" fill="#2457ff"/><text x="27" y="18" font-size="10.5" font-weight="700" class="muted">Decision layer</text>
     <rect x="160" y="0" width="164" height="28" rx="14" fill="#fff" stroke="#d4ddea"/><circle cx="175" cy="14" r="5" fill="#138f5b"/><text x="187" y="18" font-size="10.5" font-weight="700" class="muted">Deterministic tools</text>
     <rect x="0" y="36" width="150" height="28" rx="14" fill="#fff" stroke="#d4ddea"/><circle cx="15" cy="50" r="5" fill="#d97706"/><text x="27" y="54" font-size="10.5" font-weight="700" class="muted">Runtime &amp; safety</text>
     <rect x="160" y="36" width="164" height="28" rx="14" fill="#fff" stroke="#d4ddea"/><circle cx="175" cy="50" r="5" fill="#6d4aff"/><text x="187" y="54" font-size="10.5" font-weight="700" class="muted">Observations &amp; output</text>
   </g>
-
   <g filter="url(#shadow)"><rect x="48" y="135" width="255" height="280" rx="20" class="card"/></g>
   <rect x="67" y="157" width="44" height="44" rx="12" fill="url(#blue)"/>
   <circle cx="89" cy="173" r="7" fill="#fff"/><path d="M76 195c2-9 24-9 26 0" fill="#fff"/>
@@ -51,7 +47,6 @@
   <rect x="67" y="315" width="217" height="82" rx="14" class="sub"/>
   <text x="82" y="337" font-size="12" class="strong">Example</text>
   <text x="82" y="358" class="small"><tspan x="82">“What F1 score did LoRA Small</tspan><tspan x="82" dy="17">achieve?”</tspan><tspan x="82" dy="17">“Which experiment used the least energy?”</tspan></text>
-
   <g filter="url(#shadow)"><rect x="360" y="135" width="365" height="280" rx="20" class="card"/></g>
   <rect x="379" y="157" width="44" height="44" rx="12" fill="url(#blue)"/>
   <rect x="389" y="167" width="24" height="24" rx="5" fill="none" stroke="#fff" stroke-width="2"/>
@@ -65,37 +60,31 @@
   <text x="392" y="366" font-size="12" class="strong">ToolAction</text><text x="392" y="383" class="tiny">tool + structured args</text>
   <rect x="548" y="347" width="158" height="49" rx="12" class="sub"/>
   <text x="561" y="366" font-size="12" class="strong">FinalAction</text><text x="561" y="383" class="tiny">answer + evidence IDs</text>
-
   <g filter="url(#shadow)"><rect x="782" y="135" width="770" height="280" rx="20" class="card"/></g>
   <rect x="801" y="157" width="44" height="44" rx="12" fill="url(#green)"/>
   <path d="M810 173h26v19h-26zM817 173v-5h12v5M810 180h26" fill="none" stroke="#fff" stroke-width="2"/>
   <text x="858" y="170" class="kicker">DETERMINISTIC TOOL LAYER</text><text x="858" y="195" class="title">ToolRegistry &amp; Tools</text>
   <text x="801" y="227" class="body">Registry exposes exactly four ordinary-Python tools and returns a structured result or error observation.</text>
-
   <g>
     <rect x="801" y="254" width="355" height="68" rx="13" class="sub"/>
     <rect x="815" y="269" width="32" height="32" rx="9" fill="url(#blue)"/>
     <circle cx="829" cy="283" r="7" fill="none" stroke="#fff" stroke-width="2"/><path d="M834 288l7 7" stroke="#fff" stroke-width="2"/>
     <text x="860" y="277" font-size="12" class="strong">search_notes</text><text x="860" y="296" class="tiny">Lexical discovery - candidate IDs / snippets</text>
     <rect x="860" y="303" width="61" height="16" rx="8" class="chip"/><text x="890.5" y="314" text-anchor="middle" class="chiptext">Discovery</text>
-
     <rect x="1175" y="254" width="358" height="68" rx="13" class="sub"/>
     <rect x="1189" y="269" width="32" height="32" rx="9" fill="url(#purple)"/>
     <path d="M1198 275h13l6 6v14h-19zM1211 275v7h6" fill="none" stroke="#fff" stroke-width="2"/>
     <text x="1234" y="277" font-size="12" class="strong">read_note</text><text x="1234" y="296" class="tiny">Authoritative content + experiment metadata</text>
     <rect x="1234" y="303" width="64" height="16" rx="8" class="chip"/><text x="1266" y="314" text-anchor="middle" class="chiptext">Grounding</text>
-
     <rect x="801" y="333" width="355" height="64" rx="13" class="sub"/>
     <rect x="815" y="347" width="32" height="32" rx="9" fill="url(#orange)"/>
     <rect x="821" y="352" width="20" height="22" rx="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M824 358h14M824 363h3M831 363h3M824 368h3M831 368h3" stroke="#fff" stroke-width="1.7"/>
     <text x="860" y="355" font-size="12" class="strong">calculate</text><text x="860" y="374" class="tiny">Safe AST arithmetic · no eval / arbitrary code</text>
-
     <rect x="1175" y="333" width="358" height="64" rx="13" class="sub"/>
     <rect x="1189" y="347" width="32" height="32" rx="9" fill="url(#green)"/>
     <circle cx="1205" cy="363" r="10" fill="none" stroke="#fff" stroke-width="2"/><path d="M1199 363l4 4 8-9" fill="none" stroke="#fff" stroke-width="2"/>
     <text x="1234" y="355" font-size="12" class="strong">check_constraints</text><text x="1234" y="374" class="tiny">Exact metadata requirements - pass / violations</text>
   </g>
-
   <g filter="url(#shadow)"><rect x="360" y="470" width="365" height="278" rx="20" class="card"/></g>
   <rect x="379" y="492" width="44" height="44" rx="12" fill="url(#orange)"/>
   <path d="M401 501l4 7 8 1-6 6 2 8-8-4-8 4 2-8-6-6 8-1z" fill="#fff"/>
@@ -108,7 +97,6 @@
     <rect x="600" y="624" width="94" height="55" rx="11" class="sub"/><circle cx="647" cy="640" r="11" fill="#eaf0ff"/><text x="647" y="644" text-anchor="middle" font-size="10" font-weight="800" fill="#2457ff">3</text><text x="647" y="660" text-anchor="middle" font-size="11" class="strong">Act</text><text x="647" y="674" text-anchor="middle" class="tiny">execute / validate</text>
   </g>
   <rect x="392" y="687" width="302" height="14" rx="7" fill="#eef3ff"/><text x="543" y="698" text-anchor="middle" font-size="9.5" font-weight="700" fill="#36528c">Model chooses semantic action · runtime controls execution &amp; safety</text>
-
   <g filter="url(#shadow)"><rect x="48" y="470" width="255" height="278" rx="20" class="card"/></g>
   <rect x="67" y="492" width="44" height="44" rx="12" fill="url(#purple)"/>
   <path d="M76 503h26v18H81l-5 5z" fill="none" stroke="#fff" stroke-width="2"/><path d="M82 509h14M82 515h9" stroke="#fff" stroke-width="2"/>
@@ -120,7 +108,6 @@
     <rect x="0" y="36" width="100" height="26" rx="10" class="sub"/><text x="50" y="53" text-anchor="middle" font-size="10" class="strong">Tool args</text>
     <rect x="110" y="36" width="107" height="26" rx="10" class="sub"/><text x="163.5" y="53" text-anchor="middle" font-size="10" class="strong">Result / error</text>
   </g>
-
   <g filter="url(#shadow)"><rect x="782" y="470" width="770" height="278" rx="20" class="card"/></g>
   <rect x="801" y="492" width="44" height="44" rx="12" fill="url(#orange)"/>
   <path d="M823 500l13 5v9c0 10-6 16-13 20-7-4-13-10-13-20v-9z" fill="none" stroke="#fff" stroke-width="2"/><path d="M817 515l4 4 8-9" fill="none" stroke="#fff" stroke-width="2"/>
@@ -137,7 +124,6 @@
   <rect x="1175" y="608" width="358" height="83" rx="13" class="sub"/><text x="1191" y="628" font-size="11.5" class="strong">Outside this prototype</text>
   <text x="1191" y="648" class="tiny"><tspan x="1191">• natural-language truth verification</tspan><tspan x="1191" dy="16">• automatic repair of malformed output</tspan><tspan x="1191" dy="16">• production prompt-injection defenses</tspan></text>
   <rect x="801" y="704" width="732" height="26" rx="10" fill="#f6f3ff" stroke="#e1d8ff"/><text x="817" y="721" font-size="10.5" fill="#574685"><tspan font-weight="750">Run outcomes:</tspan> completed · final_rejected · max_steps. Tool errors become observations for possible recovery.</text>
-
   <path d="M303 260 H350" fill="none" stroke="#2457ff" stroke-width="3.5" marker-end="url(#blueA)"/>
   <rect x="304" y="232" width="46" height="18" rx="9" fill="#f5f7fb"/><text x="327" y="245" text-anchor="middle" class="arrowlbl" fill="#2457ff">question</text>
   <path d="M543 415 V460" fill="none" stroke="#2457ff" stroke-width="3.5" marker-end="url(#blueA)"/>
@@ -146,11 +132,10 @@
   <rect x="703" y="550" width="88" height="18" rx="9" fill="#f5f7fb"/><text x="747" y="563" text-anchor="middle" class="arrowlbl" fill="#d97706">execute tool</text>
   <path d="M725 665 H772" fill="none" stroke="#d97706" stroke-width="3.5" marker-end="url(#orangeA)"/>
   <rect x="702" y="676" width="92" height="18" rx="9" fill="#f5f7fb"/><text x="748" y="689" text-anchor="middle" class="arrowlbl" fill="#d97706">final action</text>
-  <path d="M1395 415 V790 H176 V758" fill="none" stroke="#6d4aff" stroke-width="3.5" marker-end="url(#purpleA)"/>
+  <path d="M1395 415 V820 H80 V808" fill="none" stroke="#6d4aff" stroke-width="3.5" marker-end="url(#purpleA)"/>
   <rect x="612" y="778" width="380" height="22" rx="11" fill="#f5f7fb"/><text x="802" y="793" text-anchor="middle" font-size="10.5" font-weight="800" fill="#6d4aff">tool result / error - observable state - next model decision</text>
   <path d="M303 610 H326 V330 H350" fill="none" stroke="#6d4aff" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#purpleA)"/>
   <rect x="293" y="445" width="73" height="18" rx="9" fill="#f5f7fb"/><text x="329.5" y="458" text-anchor="middle" class="arrowlbl" fill="#6d4aff">next step</text>
-
   <line x1="48" y1="842" x2="1552" y2="842" stroke="#d7dfea"/>
   <text x="48" y="868" font-size="12" class="muted"><tspan font-weight="800" fill="#26364d">Key principle:</tspan> The model controls the next semantic action; the runtime controls execution and safety.</text>
   <text x="1552" y="868" text-anchor="end" font-size="11" class="muted">Research Evidence Agent · Technical Interview Prototype</text>
