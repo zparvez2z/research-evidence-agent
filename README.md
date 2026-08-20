@@ -1,23 +1,17 @@
 # Research Evidence Agent
 
-This repository contains a deliberately small Research Evidence Agent whose
-core mechanics are clear enough to explain during a technical interview.
+A deliberately small, explainable research agent for a technical-interview
+exercise. It answers questions from a six-note synthetic corpus while keeping
+model decisions, deterministic execution, and explicit evidence separate.
 
-The architecture is an **observe-decide-act** loop: a model chooses
-one next action based on the user's goal and prior observations, application
-code will execute that action, and the resulting structured observation will
-inform the model's next decision.
+## Why this is agentic
 
-Deterministic Python code will be responsible for tool execution, input and
-final-answer validation, explicit constraint checks, and safety limits. Model
-decisions will be reserved for semantic interpretation and adaptive action
-selection.
+The next action is not hard-coded in the runtime. A `DecisionModel` chooses a
+`ToolAction` or `FinalAction` from the question and previous observations, so a
+later choice can depend on an earlier tool result. If the sequence were
+completely predictable, a deterministic workflow would be preferable.
 
-The repository includes a six-note synthetic evidence corpus, four deterministic
-tools for lexical note search, note retrieval, safe arithmetic, and
-source-backed constraint checking, typed actions and state, a provider-neutral
-`DecisionModel`, an explicit single-agent runtime loop, and a deterministic
-final-answer provenance gate.
+## Architecture
 
 ```text
 User question
@@ -35,25 +29,66 @@ ToolAction / FinalAction
      +--> FinalAction --> provenance gate --> answer / reject
 ```
 
-The provenance gate verifies that cited document IDs were successfully read
-during the run; it does not judge whether the answer's claims are true.
+`ResearchAgent` owns this explicit, single-agent observe-decide-act loop. Model
+code selects actions; ordinary Python validates, executes, records, and stops.
 
-## Requirements
+## Deterministic tools
 
-- Python 3.11 or newer
-- `pytest` for tests
+- `search_notes` performs lexical search over the local Markdown corpus.
+- `read_note` retrieves one allow-listed document ID.
+- `calculate` evaluates a small safe arithmetic syntax without `eval`.
+- `check_constraints` checks explicit metadata comparisons and reports violations.
+
+## Reliability boundaries
+
+- An explicit registry exposes only the four tools above.
+- Model actions use strict JSON structures parsed into typed actions.
+- Tool failures become observations, allowing a later recovery action.
+- `max_steps` bounds every run.
+- The final-answer gate requires cited source IDs to have been read successfully.
+- Missing measurements can produce a source-grounded abstention instead of a guess.
+
+The provenance gate verifies that cited evidence was read; it does not prove
+that every natural-language claim is factually correct. Model-output repair,
+semantic claim verification, and robust prompt-injection defenses remain outside
+this prototype.
+
+## Model options
+
+- `ScriptedModel` supplies deterministic testing, evaluation, and offline fallback.
+- `TransformersDecisionModel` supports optional open-weight local inference.
+- The Colab default is `Qwen/Qwen2.5-1.5B-Instruct`.
+- No cloud inference API is required.
+
+Core runtime dependencies are standard-library only. Optional Colab dependencies
+are installed with `pip install -e ".[colab]"`.
+
+## Run tests
+
+```bash
+python -m pytest -q
+```
+
+## Run deterministic evaluation
+
+```bash
+python eval/evaluate.py
+```
+
+The ten scripted cases measure observable runtime behavior such as tool
+dispatch, grounding, recovery, abstention, arithmetic, constraints, and bounded
+execution. They do not measure Qwen intelligence or open-ended answer quality,
+and they do not download or invoke a model.
+
+For a minimal offline example, run `python demo.py`.
 
 ## Colab demo
 
-`demo_colab.ipynb` runs the agent with the open-weight
-`Qwen/Qwen2.5-1.5B-Instruct` model through Hugging Face Transformers on a Colab
-runtime. The model only selects the next structured action; `ResearchAgent`
-still executes the four deterministic tools and enforces the runtime and
-provenance rules. `ScriptedModel` remains available in the notebook as a
-clearly labeled deterministic fallback when model download or inference is
-unavailable.
+[`demo_colab.ipynb`](demo_colab.ipynb) demonstrates the same runtime with the
+optional Transformers decision model and clearly labeled scripted fallback.
 
-Transformers and PyTorch remain optional so the core package and offline test
-suite stay lightweight. Install the demo dependencies with
-`pip install -e ".[colab]"`; the notebook also includes this installation
-step.
+## Scope
+
+This is intentionally a roughly one-day prototype, not a production platform.
+Deliberate non-goals include multi-agent orchestration, a vector database, a web
+UI, production authentication, and automatic model-output repair.
