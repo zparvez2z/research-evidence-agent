@@ -1,0 +1,158 @@
+[
+  {
+    "id": "factual_lora_f1",
+    "question": "What F1 score did LoRA Small achieve?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "LoRA Small F1"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "lora-small"}},
+      {"type": "final", "answer": "LoRA Small achieved an F1 score of 0.74.", "evidence_ids": ["lora-small"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["lora-small"],
+      "required_tools": ["search_notes", "read_note"],
+      "answer_contains": ["0.74"]
+    }
+  },
+  {
+    "id": "factual_large_api_local",
+    "question": "Does Large API run locally?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "Large API local inference"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "large-api"}},
+      {"type": "final", "answer": "No. Large API is remotely hosted; local_inference is false.", "evidence_ids": ["large-api"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["large-api"],
+      "required_tools": ["search_notes", "read_note"],
+      "answer_contains": ["remotely hosted", "false"]
+    }
+  },
+  {
+    "id": "unique_constraint_match",
+    "question": "Which experiment meets F1 >= 0.72, latency < 150 ms, and local inference?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "F1 latency local inference"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "distilled-hybrid"}},
+      {"type": "tool", "tool": "check_constraints", "arguments": {"document_id": "distilled-hybrid", "requirements": [{"field": "f1", "op": ">=", "value": 0.72}, {"field": "latency_ms", "op": "<", "value": 150}, {"field": "local_inference", "op": "==", "value": true}]}},
+      {"type": "final", "answer": "Distilled Hybrid meets all three constraints.", "evidence_ids": ["distilled-hybrid"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["distilled-hybrid"],
+      "required_tools": ["search_notes", "read_note", "check_constraints"],
+      "answer_contains": ["Distilled Hybrid"]
+    }
+  },
+  {
+    "id": "arithmetic_comparison",
+    "question": "How many percentage points higher is LoRA Small's F1 than the baseline?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "baseline-transformer"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "lora-small"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "0.74 - 0.70"}},
+      {"type": "final", "answer": "LoRA Small's F1 is 0.04 higher, or 4 percentage points above the baseline.", "evidence_ids": ["baseline-transformer", "lora-small"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["baseline-transformer", "lora-small"],
+      "required_tools": ["read_note", "calculate"],
+      "answer_contains": ["0.04", "4 percentage points"]
+    }
+  },
+  {
+    "id": "gpu_memory_fact",
+    "question": "How much GPU memory does Quantized Small use?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "quantized-small"}},
+      {"type": "final", "answer": "Quantized Small uses 3 GB of GPU memory.", "evidence_ids": ["quantized-small"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["quantized-small"],
+      "required_tools": ["read_note"],
+      "answer_contains": ["3 GB"]
+    }
+  },
+  {
+    "id": "insufficient_energy",
+    "question": "Which experiment used the least energy?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "energy"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "evaluation-protocol"}},
+      {"type": "final", "answer": "The available evidence is insufficient because energy consumption was not measured.", "evidence_ids": ["evaluation-protocol"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["evaluation-protocol"],
+      "required_tools": ["search_notes", "read_note"],
+      "answer_contains": ["insufficient", "not measured"]
+    }
+  },
+  {
+    "id": "insufficient_training_cost",
+    "question": "What was the training cost in euros?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "training cost"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "evaluation-protocol"}},
+      {"type": "final", "answer": "Monetary training cost was not measured.", "evidence_ids": ["evaluation-protocol"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["evaluation-protocol"],
+      "required_tools": ["search_notes", "read_note"],
+      "answer_contains": ["not measured"]
+    }
+  },
+  {
+    "id": "latency_comparability",
+    "question": "Can I directly compare the API latency with the local-model latency?",
+    "scripted_actions": [
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "evaluation-protocol"}},
+      {"type": "final", "answer": "Compare them cautiously because API latency includes network and provider overhead.", "evidence_ids": ["evaluation-protocol"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["evaluation-protocol"],
+      "required_tools": ["read_note"],
+      "answer_contains": ["cautiously", "network", "provider overhead"]
+    }
+  },
+  {
+    "id": "tool_error_recovery",
+    "question": "Recover from a missing document and tell me LoRA Small's F1.",
+    "scripted_actions": [
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "missing-document"}},
+      {"type": "tool", "tool": "search_notes", "arguments": {"query": "LoRA"}},
+      {"type": "tool", "tool": "read_note", "arguments": {"document_id": "lora-small"}},
+      {"type": "final", "answer": "After recovering from the missing document, LoRA Small's F1 is 0.74.", "evidence_ids": ["lora-small"]}
+    ],
+    "expectations": {
+      "status": "completed",
+      "required_evidence_ids": ["lora-small"],
+      "required_tools": ["search_notes", "read_note"],
+      "answer_contains": ["0.74"],
+      "minimum_error_count": 1
+    }
+  },
+  {
+    "id": "max_step_safety",
+    "question": "Demonstrate bounded execution.",
+    "scripted_actions": [
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "1"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "2"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "3"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "4"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "5"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "6"}},
+      {"type": "tool", "tool": "calculate", "arguments": {"expression": "7"}}
+    ],
+    "expectations": {
+      "status": "max_steps",
+      "required_evidence_ids": [],
+      "required_tools": ["calculate"],
+      "maximum_tool_count": 6
+    }
+  }
+]
