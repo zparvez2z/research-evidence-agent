@@ -90,7 +90,8 @@ def test_system_instruction_does_not_request_hidden_reasoning() -> None:
 def test_system_instruction_directs_search_progress_and_avoids_repeats() -> None:
     instruction = SYSTEM_INSTRUCTION.lower()
     assert "after finding a relevant result, normally call read_note" in instruction
-    assert "do not repeat an identical successful tool call" in instruction
+    assert "do not repeat the same successful search" in instruction
+    assert "read a relevant document next" in instruction
     assert 'tool action: {"action":"<tool name>"' in instruction
     assert 'final action: {"action":"final"' in instruction
 
