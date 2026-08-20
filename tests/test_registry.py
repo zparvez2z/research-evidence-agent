@@ -8,6 +8,22 @@ def test_registry_exposes_exactly_four_named_tools() -> None:
     assert names == ["search_notes", "read_note", "calculate", "check_constraints"]
 
 
+def test_constraint_spec_exposes_only_supported_fields_and_operators() -> None:
+    specs = {spec.name: spec for spec in create_default_registry().list_specs()}
+    item = specs["check_constraints"].parameters["properties"]["requirements"]["items"]
+
+    assert item["properties"]["field"]["enum"] == [
+        "f1",
+        "latency_ms",
+        "local_inference",
+        "gpu_memory_gb",
+    ]
+    assert item["properties"]["op"]["enum"] == [">", ">=", "<", "<=", "==", "!="]
+    assert item["properties"]["value"]["type"] == ["number", "boolean"]
+    assert item["required"] == ["field", "op", "value"]
+    assert item["additionalProperties"] is False
+
+
 def test_registry_executes_search_notes() -> None:
     result = create_default_registry().execute("search_notes", {"query": "quantized"})
     assert result[0]["document_id"] == "quantized-small"

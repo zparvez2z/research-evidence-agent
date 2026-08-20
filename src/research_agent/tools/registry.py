@@ -26,7 +26,11 @@ class ToolRegistry:
             (
                 ToolSpec(
                     name="search_notes",
-                    description="Search the local evidence notes for relevant documents.",
+                    description=(
+                        "Discover candidate evidence documents using lexical search. "
+                        "After finding a relevant document, normally use read_note to "
+                        "inspect authoritative content and metadata."
+                    ),
                     parameters={
                         "type": "object",
                         "properties": {
@@ -42,7 +46,10 @@ class ToolRegistry:
             (
                 ToolSpec(
                     name="read_note",
-                    description="Read one local evidence note by document ID.",
+                    description=(
+                        "Read authoritative content and metadata for one document ID. "
+                        "Evidence cited in a final answer must have been read successfully."
+                    ),
                     parameters={
                         "type": "object",
                         "properties": {"document_id": {"type": "string"}},
@@ -68,7 +75,10 @@ class ToolRegistry:
             (
                 ToolSpec(
                     name="check_constraints",
-                    description="Check requirements against a note's metadata.",
+                    description=(
+                        "Deterministically compare exact experiment metadata fields "
+                        "against structured requirements. Use only experiment document IDs."
+                    ),
                     parameters={
                         "type": "object",
                         "properties": {
@@ -77,7 +87,24 @@ class ToolRegistry:
                                 "type": "array",
                                 "items": {
                                     "type": "object",
+                                    "properties": {
+                                        "field": {
+                                            "type": "string",
+                                            "enum": [
+                                                "f1",
+                                                "latency_ms",
+                                                "local_inference",
+                                                "gpu_memory_gb",
+                                            ],
+                                        },
+                                        "op": {
+                                            "type": "string",
+                                            "enum": [">", ">=", "<", "<=", "==", "!="],
+                                        },
+                                        "value": {"type": ["number", "boolean"]},
+                                    },
                                     "required": ["field", "op", "value"],
+                                    "additionalProperties": False,
                                 },
                             },
                         },

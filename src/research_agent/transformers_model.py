@@ -13,13 +13,17 @@ from .tools.registry import ToolSpec
 
 SYSTEM_INSTRUCTION = """You are the decision component of a Research Evidence Agent.
 At each call, select exactly ONE next action: call one available tool or provide a final answer.
-Return ONLY one JSON object.
-Tool action: {"type":"tool","tool":"<tool name>","arguments":{}}
-Final action: {"type":"final","answer":"<user-facing answer>","evidence_ids":["<document id>"]}
-Use only tools in the supplied tool specifications and use previous observations.
-Do not invent document IDs. Final answers must cite IDs successfully read with read_note.
-If requested information was not measured or is unavailable, say the evidence is insufficient.
-Do not output analysis, rationale, markdown, code fences, or text outside the JSON object."""
+Return exactly one JSON object.
+Tool action: {"action":"<tool name>","arguments":{}}
+Final action: {"action":"final","answer":"<user-facing answer>","evidence_ids":["<document id>"]}
+Use only the supplied tool specifications and previous observations.
+search_notes discovers candidate document IDs; its snippets are discovery information, not authoritative final-answer evidence. After finding a relevant result, normally call read_note instead of repeating the same search.
+HARD RULE: if there is no successful read_note observation yet, a final action is forbidden.
+HARD RULE: after a successful search_notes result contains a relevant candidate, do not repeat the same successful search; read a relevant document next.
+HARD RULE: a final action must contain at least one evidence_id, and every evidence_id must correspond to a successful read_note observation from this run.
+For unavailable or missing measurements, search for relevant evidence, read the document explaining the limitation, then return a grounded insufficient-evidence answer citing that document.
+For constraint questions with thresholds or requirements, do not finalize until you have read a candidate experiment and successfully used check_constraints on a relevant experiment document. Use exact metadata field names and exact supported operators from its tool specification; do not call it on evaluation-protocol. Do not invent aliases such as "F1", "latency", or "local inference" when the specified fields are "f1", "latency_ms", and "local_inference".
+Do not invent document IDs. Do not output analysis, rationale, scratchpad, markdown, code fences, or text outside the action JSON."""
 
 
 def tool_spec_to_dict(spec: ToolSpec) -> dict[str, Any]:
@@ -68,8 +72,40 @@ def _strip_json_fence(text: str) -> str:
     return stripped
 
 
+def _parse_qwen_action(value: dict[str, Any]) -> Action | None:
+    """Parse the narrow action shape observed from Qwen3.5, if present."""
+    if "action" not in value or "type" in value:
+        return None
+
+    action_name = value.get("action")
+    if not isinstance(action_name, str) or not action_name.strip():
+        raise ValueError("Model action must be a non-blank string")
+
+    if action_name == "final":
+        expected = {"action", "answer", "evidence_ids"}
+        if set(value) != expected:
+            raise ValueError(
+                "Final action must contain exactly: action, answer, evidence_ids"
+            )
+        if not isinstance(value["answer"], str) or not value["answer"].strip():
+            raise ValueError("Final action answer must be a non-blank string")
+        evidence_ids = value["evidence_ids"]
+        if not isinstance(evidence_ids, list) or any(
+            not isinstance(item, str) or not item.strip() for item in evidence_ids
+        ):
+            raise ValueError("Final action evidence_ids must be an array of strings")
+        return FinalAction(answer=value["answer"], evidence_ids=evidence_ids)
+
+    expected = {"action", "arguments"}
+    if set(value) != expected:
+        raise ValueError("Tool action must contain exactly: action, arguments")
+    if not isinstance(value["arguments"], dict):
+        raise ValueError("Tool action arguments must be an object")
+    return ToolAction(tool=action_name, arguments=value["arguments"])
+
+
 def parse_model_action(text: str) -> Action:
-    """Parse one strict model JSON object into an existing action dataclass."""
+    """Parse one strict supported model JSON object into an existing action dataclass."""
     try:
         value = json.loads(_strip_json_fence(text))
     except json.JSONDecodeError as error:
@@ -77,6 +113,10 @@ def parse_model_action(text: str) -> Action:
 
     if not isinstance(value, dict):
         raise ValueError("Model action must be a JSON object")
+
+    qwen_action = _parse_qwen_action(value)
+    if qwen_action is not None:
+        return qwen_action
 
     action_type = value.get("type")
     if action_type == "tool":
@@ -110,21 +150,22 @@ def parse_model_action(text: str) -> Action:
 def _import_model_dependencies() -> tuple[Any, Any, Any]:
     try:
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoModelForMultimodalLM, AutoProcessor
     except ImportError as error:
         raise RuntimeError(
             "TransformersDecisionModel requires the optional Colab/model "
-            "dependencies. Install them with: pip install -e '.[colab]'"
+            "dependencies. Follow the Transformers-from-main and editable "
+            "installation commands in demo_colab.ipynb."
         ) from error
-    return torch, AutoTokenizer, AutoModelForCausalLM
+    return torch, AutoProcessor, AutoModelForMultimodalLM
 
 
 class TransformersDecisionModel:
-    """Select structured actions with a local Hugging Face causal language model."""
+    """Select structured actions with a local Hugging Face multimodal model."""
 
     def __init__(
         self,
-        model_name: str = "Qwen/Qwen2.5-1.5B-Instruct",
+        model_name: str = "Qwen/Qwen3.5-2B",
         max_new_tokens: int = 256,
     ) -> None:
         if not isinstance(model_name, str) or not model_name.strip():
@@ -136,10 +177,10 @@ class TransformersDecisionModel:
         ):
             raise ValueError("max_new_tokens must be a positive integer")
 
-        torch, tokenizer_class, model_class = _import_model_dependencies()
+        torch, processor_class, model_class = _import_model_dependencies()
         self._torch = torch
-        self._tokenizer = tokenizer_class.from_pretrained(model_name)
-        model_options = {"torch_dtype": torch.float16} if torch.cuda.is_available() else {}
+        self._processor = processor_class.from_pretrained(model_name)
+        model_options = {"dtype": torch.float16} if torch.cuda.is_available() else {}
         self._model = model_class.from_pretrained(model_name, **model_options)
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._model.to(self._device)
@@ -160,9 +201,10 @@ class TransformersDecisionModel:
                 "content": build_user_context(question, observations, tools),
             },
         ]
-        inputs = self._tokenizer.apply_chat_template(
+        inputs = self._processor.apply_chat_template(
             messages,
             add_generation_prompt=True,
+            enable_thinking=False,
             tokenize=True,
             return_dict=True,
             return_tensors="pt",
@@ -173,8 +215,7 @@ class TransformersDecisionModel:
                 **inputs,
                 do_sample=False,
                 max_new_tokens=self.max_new_tokens,
-                pad_token_id=self._tokenizer.eos_token_id,
             )
         new_tokens = generated_ids[0, prompt_length:]
-        response = self._tokenizer.decode(new_tokens, skip_special_tokens=True)
+        response = self._processor.decode(new_tokens, skip_special_tokens=True)
         return parse_model_action(response)
