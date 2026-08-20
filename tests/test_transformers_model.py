@@ -163,6 +163,7 @@ def test_decide_supports_batch_encoding_outputs() -> None:
 
     class FakeProcessor:
         def apply_chat_template(self, messages: object, **kwargs: object) -> FakeBatchEncoding:
+            assert kwargs["enable_thinking"] is False
             assert kwargs["tokenize"] is True
             assert kwargs["return_dict"] is True
             assert kwargs["return_tensors"] == "pt"
