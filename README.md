@@ -56,12 +56,18 @@ this prototype.
 ## Model options
 
 - `ScriptedModel` supplies deterministic testing, evaluation, and offline fallback.
-- `TransformersDecisionModel` supports optional open-weight local inference.
-- The Colab default is `Qwen/Qwen2.5-1.5B-Instruct`.
-- No cloud inference API is required.
+- `TransformersDecisionModel` uses the open-weight `Qwen/Qwen3.5-2B` by default.
+- Inference runs inside the Colab runtime; no cloud inference API is used.
+- The model only chooses structured actions. `ResearchAgent` still executes and
+  validates those actions.
+- `ScriptedModel` remains the deterministic fallback.
 
 Core runtime dependencies are standard-library only. Optional Colab dependencies
-are installed with `pip install -e ".[colab]"`.
+for PyTorch and image processing are installed with `pip install -e ".[colab]"`.
+Because Qwen3.5 support is newer than an honest stable minimum currently captures,
+the notebook installs Transformers directly from the official Hugging Face `main`
+branch before installing this repository. The normal and test dependency sets are
+unchanged.
 
 ## Run tests
 

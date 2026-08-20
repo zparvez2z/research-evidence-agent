@@ -73,7 +73,53 @@ def test_context_contains_only_explicit_observable_fields() -> None:
 
 def test_system_instruction_does_not_request_hidden_reasoning() -> None:
     assert "do not output analysis, rationale" in SYSTEM_INSTRUCTION.lower()
-    assert "scratchpad" not in SYSTEM_INSTRUCTION.lower()
+    assert "thinking" not in SYSTEM_INSTRUCTION.lower()
+    assert "reasoning" not in SYSTEM_INSTRUCTION.lower()
+
+
+def test_system_instruction_directs_search_progress_and_avoids_repeats() -> None:
+    instruction = SYSTEM_INSTRUCTION.lower()
+    assert "after finding a relevant result, normally call read_note" in instruction
+    assert "do not repeat an identical successful tool call" in instruction
+
+
+def test_default_model_is_qwen_3_5(monkeypatch: pytest.MonkeyPatch) -> None:
+    loaded_names: list[str] = []
+
+    class FakeCuda:
+        @staticmethod
+        def is_available() -> bool:
+            return False
+
+    class FakeTorch:
+        cuda = FakeCuda()
+
+        @staticmethod
+        def device(name: str) -> str:
+            return name
+
+    class FakeLoadedModel:
+        def to(self, device: object) -> None:
+            assert device == "cpu"
+
+        def eval(self) -> None:
+            pass
+
+    class FakeLoader:
+        @staticmethod
+        def from_pretrained(model_name: str, **kwargs: object) -> object:
+            loaded_names.append(model_name)
+            assert kwargs == {}
+            return FakeLoadedModel() if len(loaded_names) == 2 else object()
+
+    monkeypatch.setattr(
+        "research_agent.transformers_model._import_model_dependencies",
+        lambda: (FakeTorch(), FakeLoader, FakeLoader),
+    )
+
+    TransformersDecisionModel()
+
+    assert loaded_names == ["Qwen/Qwen3.5-2B", "Qwen/Qwen3.5-2B"]
 
 
 def test_missing_optional_dependencies_produce_clear_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -102,9 +148,7 @@ def test_decide_supports_batch_encoding_outputs() -> None:
             assert key == (0, slice(3, None, None))
             return ["generated-token"]
 
-    class FakeTokenizer:
-        eos_token_id = 0
-
+    class FakeProcessor:
         def apply_chat_template(self, messages: object, **kwargs: object) -> FakeBatchEncoding:
             assert kwargs["tokenize"] is True
             assert kwargs["return_dict"] is True
@@ -138,7 +182,7 @@ def test_decide_supports_batch_encoding_outputs() -> None:
 
     model = object.__new__(TransformersDecisionModel)
     model._torch = FakeTorch()
-    model._tokenizer = FakeTokenizer()
+    model._processor = FakeProcessor()
     model._model = FakeModel()
     model._device = "fake-device"
     model.max_new_tokens = 32
