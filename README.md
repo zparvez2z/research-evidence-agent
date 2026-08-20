@@ -35,11 +35,25 @@ ToolAction / FinalAction
      +--> FinalAction --> provenance gate --> answer / reject
 ```
 
-No real LLM/API provider, CLI workflow, or evaluation runner is implemented
-yet. The provenance gate verifies that cited document IDs were successfully
-read during the run; it does not judge whether the answer's claims are true.
+The provenance gate verifies that cited document IDs were successfully read
+during the run; it does not judge whether the answer's claims are true.
 
 ## Requirements
 
 - Python 3.11 or newer
 - `pytest` for tests
+
+## Colab demo
+
+`demo_colab.ipynb` runs the agent with the open-weight
+`Qwen/Qwen2.5-1.5B-Instruct` model through Hugging Face Transformers on a Colab
+runtime. The model only selects the next structured action; `ResearchAgent`
+still executes the four deterministic tools and enforces the runtime and
+provenance rules. `ScriptedModel` remains available in the notebook as a
+clearly labeled deterministic fallback when model download or inference is
+unavailable.
+
+Transformers and PyTorch remain optional so the core package and offline test
+suite stay lightweight. Install the demo dependencies with
+`pip install -e ".[colab]"`; the notebook also includes this installation
+step.
