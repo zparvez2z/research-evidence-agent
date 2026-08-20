@@ -87,3 +87,62 @@ def test_missing_optional_dependencies_produce_clear_error(monkeypatch: pytest.M
     monkeypatch.setattr(builtins, "__import__", missing_import)
     with pytest.raises(RuntimeError, match="optional Colab/model dependencies"):
         TransformersDecisionModel()
+
+
+def test_decide_supports_batch_encoding_outputs() -> None:
+    class FakeInputIds:
+        shape = (1, 3)
+
+    class FakeBatchEncoding(dict):
+        def to(self, device: object) -> "FakeBatchEncoding":
+            return self
+
+    class FakeGeneratedIds:
+        def __getitem__(self, key: object) -> list[str]:
+            assert key == (0, slice(3, None, None))
+            return ["generated-token"]
+
+    class FakeTokenizer:
+        eos_token_id = 0
+
+        def apply_chat_template(self, messages: object, **kwargs: object) -> FakeBatchEncoding:
+            assert kwargs["tokenize"] is True
+            assert kwargs["return_dict"] is True
+            assert kwargs["return_tensors"] == "pt"
+            return FakeBatchEncoding(
+                input_ids=FakeInputIds(),
+                attention_mask=object(),
+            )
+
+        def decode(self, tokens: object, *, skip_special_tokens: bool) -> str:
+            assert skip_special_tokens is True
+            return '{"type":"tool","tool":"search_notes","arguments":{"query":"LoRA"}}'
+
+    class FakeModel:
+        def generate(self, **kwargs: object) -> FakeGeneratedIds:
+            assert "input_ids" in kwargs
+            assert "attention_mask" in kwargs
+            assert kwargs["do_sample"] is False
+            return FakeGeneratedIds()
+
+    class FakeInferenceMode:
+        def __enter__(self) -> None:
+            return None
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+    class FakeTorch:
+        def inference_mode(self) -> FakeInferenceMode:
+            return FakeInferenceMode()
+
+    model = object.__new__(TransformersDecisionModel)
+    model._torch = FakeTorch()
+    model._tokenizer = FakeTokenizer()
+    model._model = FakeModel()
+    model._device = "fake-device"
+    model.max_new_tokens = 32
+
+    action = model.decide("What was measured?", [], [])
+
+    assert action == ToolAction("search_notes", {"query": "LoRA"})
