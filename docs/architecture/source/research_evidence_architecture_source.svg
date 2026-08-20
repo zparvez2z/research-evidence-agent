@@ -61,7 +61,7 @@
   <text class="eyebrow" x="142" y="219">INPUT</text>
   <text class="heading" x="82" y="282">User Question</text>
   <text class="body" x="82" y="315">
-    <tspan x="82">A natural-language goal about</tspan>
+    <tspan x="82">A natural-language goal for</tspan>
     <tspan x="82" dy="21">the local evidence corpus.</tspan>
   </text>
   <rect x="82" y="365" width="206" height="42" rx="10" fill="#f5f8fc" stroke="#dce4ee"/>
@@ -76,7 +76,7 @@
   <text class="eyebrow" x="472" y="219">SEMANTIC DECISION</text>
   <text class="heading" x="412" y="282">DecisionModel</text>
   <text class="body" x="412" y="315">
-    <tspan x="412">Chooses exactly one next action from</tspan>
+    <tspan x="412">Chooses one next action from</tspan>
     <tspan x="412" dy="21">the question, tool schemas, and prior</tspan>
     <tspan x="412" dy="21">observable outcomes.</tspan>
   </text>
@@ -111,7 +111,7 @@
   <text class="heading" x="1242" y="282">Provenance Gate</text>
   <text class="body" x="1242" y="315">
     <tspan x="1242">Validates final evidence IDs against</tspan>
-    <tspan x="1242" dy="21">documents successfully read in this run.</tspan>
+    <tspan x="1242" dy="21">documents read during this run.</tspan>
   </text>
   <rect x="1242" y="365" width="276" height="43" rx="10" fill="#fff7ed" stroke="#f1d5b4"/>
   <text class="detail" x="1380" y="383" text-anchor="middle">Accepted final answer</text>
@@ -125,8 +125,8 @@
   <text class="eyebrow" x="472" y="574">FEEDBACK CHANNEL</text>
   <text class="heading" x="412" y="637">Observable State</text>
   <text class="body" x="412" y="670">
-    <tspan x="412">Tool calls and outcomes become visible</tspan>
-    <tspan x="412" dy="21">input to the next model decision.</tspan>
+    <tspan x="412">Tool calls and outcomes are visible</tspan>
+    <tspan x="412" dy="21">to the next model decision.</tspan>
   </text>
   <rect x="412" y="718" width="266" height="26" rx="8" fill="#f5f2ff"/>
   <text class="small" x="545" y="736" text-anchor="middle">step · tool · arguments · result / error</text>
@@ -145,31 +145,31 @@
     <rect x="534" width="182" height="39" rx="10" fill="#f1faf6" stroke="#cde7dc"/><text class="detail" x="625" y="24" text-anchor="middle">check_constraints</text>
   </g>
 
-  <!-- Forward flow: endpoints stop at card boundaries; compact markers avoid collisions. -->
-  <path class="flow" d="M310 305 H380" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
-  <rect x="320" y="275" width="61" height="20" rx="10" fill="#f3f6fa"/>
-  <text class="label" x="350" y="290" text-anchor="middle" fill="#2563eb">question</text>
+  <!-- Forward flow: endpoints stay in open gutters; compact markers avoid card borders. -->
+  <path class="flow" d="M320 305 H380" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <rect x="312" y="273" width="76" height="22" rx="11" fill="#f3f6fa"/>
+  <text class="label" x="350" y="289" text-anchor="middle" fill="#2563eb">question</text>
 
-  <path class="flow" d="M700 305 H770" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
-  <rect x="693" y="275" width="85" height="20" rx="10" fill="#f3f6fa"/>
-  <text class="label" x="735" y="290" text-anchor="middle" fill="#2563eb">structured action</text>
+  <path class="flow" d="M710 305 H770" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <rect x="702" y="265" width="76" height="34" rx="12" fill="#f3f6fa"/>
+  <text class="label" x="740" y="279" text-anchor="middle" fill="#2563eb" font-size="10"><tspan x="740">structured</tspan><tspan x="740" dy="13">action</tspan></text>
 
-  <path class="flow" d="M1140 305 H1210" stroke="#c66a08" marker-end="url(#arrow-amber)"/>
-  <rect x="1137" y="275" width="77" height="20" rx="10" fill="#f3f6fa"/>
-  <text class="label" x="1175" y="290" text-anchor="middle" fill="#c66a08">final action</text>
+  <path class="flow" d="M1150 305 H1210" stroke="#c66a08" marker-end="url(#arrow-amber)"/>
+  <rect x="1145" y="265" width="60" height="34" rx="12" fill="#f3f6fa"/>
+  <text class="label" x="1175" y="279" text-anchor="middle" fill="#c66a08"><tspan x="1175">final</tspan><tspan x="1175" dy="13">action</tspan></text>
 
-  <path class="flow" d="M960 430 V525" stroke="#0f8a63" marker-end="url(#arrow-green)"/>
-  <rect x="973" y="468" width="82" height="20" rx="10" fill="#f3f6fa"/>
-  <text class="label" x="1014" y="483" text-anchor="middle" fill="#0f8a63">execute tool</text>
+  <path class="flow" d="M960 440 V525" stroke="#0f8a63" marker-end="url(#arrow-green)"/>
+  <rect x="974" y="467" width="100" height="22" rx="11" fill="#f3f6fa"/>
+  <text class="label" x="1024" y="483" text-anchor="middle" fill="#0f8a63">execute tool</text>
 
-  <path class="flow" d="M780 650 H710" stroke="#6d4ed7" marker-end="url(#arrow-purple)"/>
-  <rect x="708" y="618" width="84" height="20" rx="10" fill="#f3f6fa"/>
-  <text class="label" x="750" y="633" text-anchor="middle" fill="#6d4ed7">result / error</text>
+  <path class="flow" d="M770 650 H710" stroke="#6d4ed7" marker-end="url(#arrow-purple)"/>
+  <rect x="721" y="610" width="58" height="34" rx="12" fill="#f3f6fa"/>
+  <text class="label" x="750" y="624" text-anchor="middle" fill="#6d4ed7"><tspan x="750">result</tspan><tspan x="750" dy="13">/ error</tspan></text>
 
   <!-- Feedback is routed entirely through the open gutter below and left of the cards. -->
-  <path class="flow" d="M545 765 V810 H350 V465 H545 V440" stroke="#6d4ed7" stroke-dasharray="7 6" marker-end="url(#arrow-purple)"/>
-  <rect x="365" y="794" width="161" height="22" rx="11" fill="#f3f6fa"/>
-  <text class="label" x="445" y="809" text-anchor="middle" fill="#6d4ed7">next model decision</text>
+  <path class="flow" d="M545 775 V820 H350 V465 H545 V440" stroke="#6d4ed7" stroke-dasharray="7 6" marker-end="url(#arrow-purple)"/>
+  <rect x="362" y="785" width="166" height="23" rx="11.5" fill="#f3f6fa"/>
+  <text class="label" x="445" y="801" text-anchor="middle" fill="#6d4ed7">next model decision</text>
 
   <!-- Footer -->
   <line x1="60" y1="846" x2="1540" y2="846" stroke="#d4dde8"/>
