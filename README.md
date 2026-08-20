@@ -23,6 +23,10 @@ handles operations that are easier to make explicit, testable, and reliable.
        width="1200">
 </p>
 
+The diagram is available as [SVG](docs/architecture/research_evidence_architecture.svg);
+its editable SVG source is kept in
+[`docs/architecture/source/`](docs/architecture/source/research_evidence_architecture_source.svg).
+
 `ResearchAgent` owns the explicit, single-agent observe-decide-act loop. The model
 selects the next semantic action; ordinary Python validates and executes tool
 calls, records observations, applies stopping rules, and routes final answers
