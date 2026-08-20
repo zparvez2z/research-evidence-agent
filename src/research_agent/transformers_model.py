@@ -160,18 +160,21 @@ class TransformersDecisionModel:
                 "content": build_user_context(question, observations, tools),
             },
         ]
-        input_ids = self._tokenizer.apply_chat_template(
+        inputs = self._tokenizer.apply_chat_template(
             messages,
             add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
             return_tensors="pt",
         ).to(self._device)
+        prompt_length = inputs["input_ids"].shape[-1]
         with self._torch.inference_mode():
             generated_ids = self._model.generate(
-                input_ids,
+                **inputs,
                 do_sample=False,
                 max_new_tokens=self.max_new_tokens,
                 pad_token_id=self._tokenizer.eos_token_id,
             )
-        new_tokens = generated_ids[0, input_ids.shape[-1] :]
+        new_tokens = generated_ids[0, prompt_length:]
         response = self._tokenizer.decode(new_tokens, skip_special_tokens=True)
         return parse_model_action(response)
