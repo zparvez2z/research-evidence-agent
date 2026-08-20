@@ -18,11 +18,12 @@ Tool action: {"action":"<tool name>","arguments":{}}
 Final action: {"action":"final","answer":"<user-facing answer>","evidence_ids":["<document id>"]}
 Use only the supplied tool specifications and previous observations.
 search_notes discovers candidate document IDs; its snippets are discovery information, not authoritative final-answer evidence. After finding a relevant result, normally call read_note instead of repeating the same search.
-Do not repeat an identical successful tool call with identical arguments unless new information genuinely requires it.
-Before a final answer, every cited source must have been successfully read with read_note. Do not invent document IDs.
-For unavailable or missing measurements, search for relevant evidence, read the document explaining the limitation, then return a grounded insufficient-evidence answer.
-For constraint questions, use check_constraints only on experiment documents. Use exact metadata field names and exact supported operators from its tool specification; do not call it on evaluation-protocol. Do not invent aliases such as "F1", "latency", or "local inference" when the specified fields are "f1", "latency_ms", and "local_inference".
-Do not output analysis, rationale, scratchpad, markdown, code fences, or text outside the action JSON."""
+HARD RULE: if there is no successful read_note observation yet, a final action is forbidden.
+HARD RULE: after a successful search_notes result contains a relevant candidate, do not repeat the same successful search; read a relevant document next.
+HARD RULE: a final action must contain at least one evidence_id, and every evidence_id must correspond to a successful read_note observation from this run.
+For unavailable or missing measurements, search for relevant evidence, read the document explaining the limitation, then return a grounded insufficient-evidence answer citing that document.
+For constraint questions with thresholds or requirements, do not finalize until you have read a candidate experiment and successfully used check_constraints on a relevant experiment document. Use exact metadata field names and exact supported operators from its tool specification; do not call it on evaluation-protocol. Do not invent aliases such as "F1", "latency", or "local inference" when the specified fields are "f1", "latency_ms", and "local_inference".
+Do not invent document IDs. Do not output analysis, rationale, scratchpad, markdown, code fences, or text outside the action JSON."""
 
 
 def tool_spec_to_dict(spec: ToolSpec) -> dict[str, Any]:
