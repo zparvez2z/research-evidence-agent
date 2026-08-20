@@ -14,8 +14,8 @@ from .tools.registry import ToolSpec
 SYSTEM_INSTRUCTION = """You are the decision component of a Research Evidence Agent.
 At each call, select exactly ONE next action: call one available tool or provide a final answer.
 Return exactly one JSON object.
-Tool action: {"type":"tool","tool":"<tool name>","arguments":{}}
-Final action: {"type":"final","answer":"<user-facing answer>","evidence_ids":["<document id>"]}
+Tool action: {"action":"<tool name>","arguments":{}}
+Final action: {"action":"final","answer":"<user-facing answer>","evidence_ids":["<document id>"]}
 Use only the supplied tool specifications and previous observations.
 search_notes discovers candidate document IDs; its snippets are discovery information, not authoritative final-answer evidence. After finding a relevant result, normally call read_note instead of repeating the same search.
 Do not repeat an identical successful tool call with identical arguments unless new information genuinely requires it.
@@ -71,8 +71,40 @@ def _strip_json_fence(text: str) -> str:
     return stripped
 
 
+def _parse_qwen_action(value: dict[str, Any]) -> Action | None:
+    """Parse the narrow action shape observed from Qwen3.5, if present."""
+    if "action" not in value or "type" in value:
+        return None
+
+    action_name = value.get("action")
+    if not isinstance(action_name, str) or not action_name.strip():
+        raise ValueError("Model action must be a non-blank string")
+
+    if action_name == "final":
+        expected = {"action", "answer", "evidence_ids"}
+        if set(value) != expected:
+            raise ValueError(
+                "Final action must contain exactly: action, answer, evidence_ids"
+            )
+        if not isinstance(value["answer"], str) or not value["answer"].strip():
+            raise ValueError("Final action answer must be a non-blank string")
+        evidence_ids = value["evidence_ids"]
+        if not isinstance(evidence_ids, list) or any(
+            not isinstance(item, str) or not item.strip() for item in evidence_ids
+        ):
+            raise ValueError("Final action evidence_ids must be an array of strings")
+        return FinalAction(answer=value["answer"], evidence_ids=evidence_ids)
+
+    expected = {"action", "arguments"}
+    if set(value) != expected:
+        raise ValueError("Tool action must contain exactly: action, arguments")
+    if not isinstance(value["arguments"], dict):
+        raise ValueError("Tool action arguments must be an object")
+    return ToolAction(tool=action_name, arguments=value["arguments"])
+
+
 def parse_model_action(text: str) -> Action:
-    """Parse one strict model JSON object into an existing action dataclass."""
+    """Parse one strict supported model JSON object into an existing action dataclass."""
     try:
         value = json.loads(_strip_json_fence(text))
     except json.JSONDecodeError as error:
@@ -80,6 +112,10 @@ def parse_model_action(text: str) -> Action:
 
     if not isinstance(value, dict):
         raise ValueError("Model action must be a JSON object")
+
+    qwen_action = _parse_qwen_action(value)
+    if qwen_action is not None:
+        return qwen_action
 
     action_type = value.get("type")
     if action_type == "tool":
@@ -143,7 +179,7 @@ class TransformersDecisionModel:
         torch, processor_class, model_class = _import_model_dependencies()
         self._torch = torch
         self._processor = processor_class.from_pretrained(model_name)
-        model_options = {"torch_dtype": torch.float16} if torch.cuda.is_available() else {}
+        model_options = {"dtype": torch.float16} if torch.cuda.is_available() else {}
         self._model = model_class.from_pretrained(model_name, **model_options)
         self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self._model.to(self._device)
