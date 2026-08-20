@@ -13,24 +13,16 @@ completely predictable, a deterministic workflow would be preferable.
 
 ## Architecture
 
-```text
-User question
-     |
-     v
-DecisionModel
-     |
-     v
-ToolAction / FinalAction
-     |
-     +--> ToolRegistry --> deterministic tool --> observation --+
-     |                                                          |
-     +------------------------- next decision <------------------+
-     |
-     +--> FinalAction --> provenance gate --> answer / reject
-```
+<p align="center">
+  <img src="docs/architecture/research_evidence_architecture.svg"
+       alt="Research Evidence Agent system architecture"
+       width="1200">
+</p>
 
-`ResearchAgent` owns this explicit, single-agent observe-decide-act loop. Model
-code selects actions; ordinary Python validates, executes, records, and stops.
+`ResearchAgent` owns this explicit, single-agent observe-decide-act loop. The
+model selects the next semantic action; ordinary Python validates, executes,
+records observations, applies stopping rules, and routes final answers through
+the provenance gate.
 
 ## Deterministic tools
 
